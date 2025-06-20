@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import greeterwithduration_pb2 as greeterwithduration__pb2
+import greeterwithnone_pb2 as greeterwithnone__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in greeterwithduration_pb2_grpc.py depends on'
+        + f' but the generated code in greeterwithnone_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class GreeterWithDurationStub(object):
+class GreeterWithNoneStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -35,13 +35,13 @@ class GreeterWithDurationStub(object):
             channel: A grpc.Channel.
         """
         self.SayHello = channel.unary_unary(
-                '/greeterwithduration.v1.GreeterWithDuration/SayHello',
-                request_serializer=greeterwithduration__pb2.WithDuration.SerializeToString,
-                response_deserializer=greeterwithduration__pb2.WithDuration.FromString,
+                '/greeterwithnone.v1.GreeterWithNone/SayHello',
+                request_serializer=greeterwithnone__pb2.WithNone.SerializeToString,
+                response_deserializer=greeterwithnone__pb2.WithNone.FromString,
                 _registered_method=True)
 
 
-class GreeterWithDurationServicer(object):
+class GreeterWithNoneServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SayHello(self, request, context):
@@ -51,22 +51,22 @@ class GreeterWithDurationServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_GreeterWithDurationServicer_to_server(servicer, server):
+def add_GreeterWithNoneServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SayHello': grpc.unary_unary_rpc_method_handler(
                     servicer.SayHello,
-                    request_deserializer=greeterwithduration__pb2.WithDuration.FromString,
-                    response_serializer=greeterwithduration__pb2.WithDuration.SerializeToString,
+                    request_deserializer=greeterwithnone__pb2.WithNone.FromString,
+                    response_serializer=greeterwithnone__pb2.WithNone.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'greeterwithduration.v1.GreeterWithDuration', rpc_method_handlers)
+            'greeterwithnone.v1.GreeterWithNone', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('greeterwithduration.v1.GreeterWithDuration', rpc_method_handlers)
+    server.add_registered_method_handlers('greeterwithnone.v1.GreeterWithNone', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class GreeterWithDuration(object):
+class GreeterWithNone(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -83,9 +83,9 @@ class GreeterWithDuration(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/greeterwithduration.v1.GreeterWithDuration/SayHello',
-            greeterwithduration__pb2.WithDuration.SerializeToString,
-            greeterwithduration__pb2.WithDuration.FromString,
+            '/greeterwithnone.v1.GreeterWithNone/SayHello',
+            greeterwithnone__pb2.WithNone.SerializeToString,
+            greeterwithnone__pb2.WithNone.FromString,
             options,
             channel_credentials,
             insecure,

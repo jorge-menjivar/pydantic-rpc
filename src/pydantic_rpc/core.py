@@ -29,6 +29,7 @@ from connecpy.wsgi import ConnecpyWSGIApp as ConnecpyWSGI
 
 # Protobuf Python modules for Timestamp, Duration (requires protobuf / grpcio)
 from google.protobuf import duration_pb2, timestamp_pb2
+from google.protobuf.struct_pb2 import NullValue
 from grpc_health.v1 import health_pb2, health_pb2_grpc
 from grpc_health.v1.health import HealthServicer
 from grpc_reflection.v1alpha import reflection
@@ -84,6 +85,11 @@ def python_to_duration(td: datetime.timedelta) -> duration_pb2.Duration:  # type
     d = duration_pb2.Duration()  # type: ignore
     d.FromTimedelta(td)
     return d
+
+
+def python_to_none() -> int:
+    """Convert a Python None to a protobuf None."""
+    return NullValue.NULL_VALUE
 
 
 def generate_converter(annotation: Type) -> Callable:
@@ -180,6 +186,10 @@ def python_value_to_proto_value(field_type: Type, value):
     # datetime.timedelta -> Duration
     if field_type == datetime.timedelta:
         return python_to_duration(value)
+
+    # None -> NullValue
+    if value is None:
+        return python_to_none()
 
     # Default behavior: return the value as-is.
     return value
@@ -537,6 +547,10 @@ def python_value_to_proto(field_type: Type, value, pb2_module):
     if field_type == datetime.timedelta:
         return python_to_duration(value)
 
+    # If None
+    if field_type is types.NoneType:
+        return python_to_none()
+
     # If enum
     if inspect.isclass(field_type) and issubclass(field_type, enum.Enum):
         return value.value  # proto3 enum is an int
@@ -565,6 +579,8 @@ def python_value_to_proto(field_type: Type, value, pb2_module):
                 return python_to_timestamp(value)
             if sub_type == datetime.timedelta and isinstance(value, datetime.timedelta):
                 return python_to_duration(value)
+            if sub_type is types.NoneType:
+                return python_to_none()
             if (
                 inspect.isclass(sub_type)
                 and issubclass(sub_type, enum.Enum)
@@ -640,6 +656,9 @@ def protobuf_type_mapping(python_type: Type) -> str | type | None:
         bytes: "bytes",
         float: "float",
     }
+
+    if python_type is types.NoneType:
+        return "google.protobuf.NullValue"
 
     if python_type == datetime.datetime:
         return "google.protobuf.Timestamp"
@@ -849,13 +868,16 @@ def generate_proto(obj: object, package_name: str = "") -> str:
 
     uses_timestamp = False
     uses_duration = False
+    uses_none = False
 
     def check_and_set_well_known_types(py_type: Type):
-        nonlocal uses_timestamp, uses_duration
+        nonlocal uses_timestamp, uses_duration, uses_none
         if py_type == datetime.datetime:
             uses_timestamp = True
         if py_type == datetime.timedelta:
             uses_duration = True
+        if py_type is types.NoneType:
+            uses_none = True
 
     for method_name, method in get_rpc_methods(obj):
         if method.__name__.startswith("_"):
@@ -931,6 +953,8 @@ def generate_proto(obj: object, package_name: str = "") -> str:
         imports.append('import "google/protobuf/timestamp.proto";')
     if uses_duration:
         imports.append('import "google/protobuf/duration.proto";')
+    if uses_none:
+        imports.append('import "google/protobuf/struct.proto";')
 
     import_block = "\n".join(imports)
     if import_block:

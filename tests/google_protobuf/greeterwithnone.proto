@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package greeterwithnone.v1;
+
+import "google/protobuf/struct.proto";
+
+service GreeterWithNone {
+    rpc SayHello (WithNone) returns (WithNone);
+}
+
+message WithNone {
+    google.protobuf.NullValue none = 1;
+}
+
